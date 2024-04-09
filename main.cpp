@@ -32,8 +32,8 @@ float Trace(float angle, float traveled_dist)
     float xn, yn;
 
     // horizontal tracing
-
-    x = entry_coord;
+    xn =
+    x = xn;
     y = 1;
     ys = y;
     while (level[angle > 0 && angle <= 180 ? y-1 : y][(int)x] != 1) {
