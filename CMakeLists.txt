@@ -13,7 +13,7 @@ FetchContent_MakeAvailable(SFML)
 add_executable(CMakeSFMLProject main.cpp
     engine-math.h
     engine-math.cpp)
-set_property(TARGET CMakeSFMLProject PROPERTY CXX_STANDARD 23)
+set_property(TARGET CMakeSFMLProject PROPERTY CXX_STANDARD 20)
 target_link_libraries(CMakeSFMLProject PRIVATE sfml-graphics)
 target_compile_features(CMakeSFMLProject PRIVATE cxx_std_17)
 
