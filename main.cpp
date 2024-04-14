@@ -157,7 +157,7 @@ float CycleAngle(float angle)
     return angle;
 }
 
-RayResult RayCast(sf::Vector2f playerCoord, float angle)
+RayResult RunRayCast(sf::Vector2f playerCoord, float angle)
 {
     float dist, dist_h, dist_v;
     sf::Vector2f touchCoord, touchCoord_h, touchCoord_v;
@@ -238,12 +238,19 @@ void RenderDebug(sf::RenderWindow& window, PlayerInfo& player, std::vector<RayRe
 
 void RenderWorld(sf::RenderWindow& window, PlayerInfo& player, std::vector<RayResult>& rays)
 {
+    sf::Color column_color = sf::Color::Green;
+    float column_width = (float)WINDOW_WIDTH / rays.size();
     for (int i = 0; i < rays.size(); i++) {
         if (rays[i].hasTouch) {
-            sf::RectangleShape column(sf::Vector2f(10, WINDOW_HEIGHT - (rays[i].distance * (WINDOW_HEIGHT / 10))));
+            float column_height = WINDOW_HEIGHT - (rays[i].distance * (WINDOW_HEIGHT / 10));
+            sf::Color color = column_color;
+            color.g = color.g - (color.g / 10 * rays[i].distance);
+            color.g = rays[i].castType == ctHorizontal ? color.g - 20 : color.g;
+
+            sf::RectangleShape column(sf::Vector2f(column_width, column_height));
             column.setOrigin(column.getSize().x / 2, column.getSize().y / 2);
-            column.setPosition(WINDOW_WIDTH/2-200+i*10, WINDOW_HEIGHT / 2);
-            column.setFillColor(sf::Color::Green);
+            column.setPosition(i * column_width, WINDOW_HEIGHT / 2);
+            column.setFillColor(color);
             window.draw(column);
         }
     }
@@ -252,7 +259,7 @@ void RenderWorld(sf::RenderWindow& window, PlayerInfo& player, std::vector<RayRe
 void Render(sf::RenderWindow& window, PlayerInfo& player)
 {
     std::vector<RayResult> rays;
-    for (float i=player.camera_angle-20*DEG_TO_RAD; i<=player.camera_angle+20*DEG_TO_RAD; i+=1*DEG_TO_RAD)
+    for (float i=player.camera_angle+20*DEG_TO_RAD; i>=player.camera_angle-20*DEG_TO_RAD; i-=0.5*DEG_TO_RAD)
         rays.push_back(RayCast(player.coord, i));
 
     RenderWorld(window, player, rays);
@@ -262,8 +269,6 @@ void Render(sf::RenderWindow& window, PlayerInfo& player)
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "25d-engine");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
 
     PlayerInfo player;
     player.coord.x = 3*CELL_SIZE;
@@ -283,13 +288,12 @@ int main()
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-            player.camera_angle -= 10.f*DEG_TO_RAD*dt.asSeconds();
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
             player.camera_angle += 10.f*DEG_TO_RAD*dt.asSeconds();
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+            player.camera_angle -= 10.f*DEG_TO_RAD*dt.asSeconds();
         player.camera_angle = CycleAngle(player.camera_angle);
 
         window.clear();
-        window.draw(shape);
         Render(window, player);
         window.display();
     }
