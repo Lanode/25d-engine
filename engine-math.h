@@ -1,7 +1,15 @@
 #ifndef ENGINEMATH_H
 #define ENGINEMATH_H
 
+#include <corecrt_math_defines.h>
+#include <cmath>
 #include <compare>
+
+#define RAD_TO_DEG 180/M_PI
+#define DEG_TO_RAD M_PI/180
+
+const int WINDOW_WIDTH = 640;
+const int WINDOW_HEIGHT = 480;
 
 namespace eng {
     struct Vector
@@ -16,5 +24,7 @@ namespace eng {
         Vector Rotate(float degrees);
     };
 }
+
+float CycleAngle(float angle);
 
 #endif // ENGINEMATH_H

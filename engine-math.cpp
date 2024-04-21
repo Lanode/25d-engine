@@ -1,3 +1,4 @@
+#include <corecrt_math_defines.h>
 #include <cmath>
 #include "engine-math.h"
 
@@ -25,3 +26,17 @@ Vector Vector::Rotate(float degrees)
         (float)(sin(degrees)*x + cos(degrees)*y)
     };
 }
+
+float CycleAngle(float angle)
+{
+    angle = fmod(angle, 2 * M_PI);
+    if (angle < 0) {
+        angle += 2 * M_PI;
+    }
+    return angle;
+}
+
+// float abs(sf::Vector2 vec)
+// {
+//     return std::sqrt(std::pow(vec.x, 2) + std::pow(vec.y, 2));
+// }
