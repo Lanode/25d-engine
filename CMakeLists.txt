@@ -11,7 +11,12 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 
 add_executable(25d-engine "main.cpp"
-    "engine-math.cpp" "engine.cpp" "renderer.cpp" "debug.cpp" "level-loader.cpp" "player.cpp")
+    "engine-math.h"  "engine-math.cpp"
+    "engine.h"       "engine.cpp"
+    "engine.h"       "renderer.cpp"
+    "debug.h"        "debug.cpp"
+    "level-loader.h" "level-loader.cpp"
+    "player.h" "player.cpp")
 set_property(TARGET 25d-engine PROPERTY CXX_STANDARD 20)
 target_link_libraries(25d-engine PRIVATE sfml-graphics)
 target_compile_features(25d-engine PRIVATE cxx_std_17)

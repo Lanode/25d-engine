@@ -1,4 +1,3 @@
-#include <corecrt_math_defines.h>
 #include <cmath>
 #include "engine-math.h"
 

@@ -1,7 +1,10 @@
 #ifndef ENGINEMATH_H
 #define ENGINEMATH_H
 
+#if _MSC_VER
 #include <corecrt_math_defines.h>
+#endif
+#include "cfloat"
 #include <cmath>
 #include <compare>
 

@@ -27,7 +27,7 @@ bool Renderer::RayCollided(CastType castType, sf::Vector2f touchCoord, float ang
             rayResult.cellCoord = sf::Vector2f(disc_x - 1, disc_y);
         }
     }
-    // если луч в 4 области окружности
+    // ???? ??? ? 4 ??????? ??????????
     else {
         if (level[disc_y][disc_x] == 1) {
             rayResult.hasTouch = true;
@@ -47,12 +47,12 @@ bool Renderer::IsRayOutOfBounds(sf::Vector2f touchCoord)
 RayResult Renderer::CastRay(CastType castType, sf::Vector2f playerCoord, float angle)
 {
     const int ROV = 10;
-    float ap, bp; // координаты игрока
-    float a, b; // полные кординаты луча
-    float as, bs; // координаты луча при ячеечных отрезках
-    float an, bn; // координаты луча при вычислении первой мили
-    bool look_to0; // луч направлен на ноль
-    std::function<float(float, float)> trig_f; // функция вычисления катета
+    float ap, bp; // ?????????? ??????
+    float a, b; // ?????? ????????? ????
+    float as, bs; // ?????????? ???? ??? ???????? ????????
+    float an, bn; // ?????????? ???? ??? ?????????? ?????? ????
+    bool look_to0; // ??? ????????? ?? ????
+    std::function<float(float, float)> trig_f; // ??????? ?????????? ??????
 
     if (castType == ctHorizontal) {
         ap = playerCoord.x;
@@ -78,7 +78,7 @@ RayResult Renderer::CastRay(CastType castType, sf::Vector2f playerCoord, float a
     a = an;
     b = bn;
 
-    // если идёт вверх то надо отбавлять, а если вниз то прибавлять
+    // ???? ???? ????? ?? ???? ?????????, ? ???? ???? ?? ??????????
     bs = look_to0 ? -1 : 1;
     as = trig_f(angle, bs);
 
@@ -130,7 +130,7 @@ RayResult Renderer::RunRayCast(sf::Vector2f playerCoord, float angle)
 
 void Renderer::RenderDebug(sf::RenderWindow& window, Player& player, std::vector<RayResult>& rays)
 {
-    const int SCALE = 15;
+    const int SCALE = window.getSize().x / 40;
     try {
         for (int x = 0; x < 10; x++) {
             for (int y = 0; y < 10; y++) {
@@ -183,22 +183,25 @@ void Renderer::RenderDebug(sf::RenderWindow& window, Player& player, std::vector
 
 void Renderer::RenderWorld(sf::RenderWindow& window, Player& player, std::vector<RayResult>& rays)
 {
-    float column_width = (float)WINDOW_WIDTH / rays.size();
+    float column_width = (float)window.getSize().x / rays.size();
+    int center_column = rays.size()/2;
     for (int i = 0; i < rays.size(); i++) {
         if (rays[i].hasTouch) {
             float beta = std::abs(rays[i].angle - player.GetRotation());
             float correct_distance = rays[i].distance * std::cos(beta);
-            float column_height = (WINDOW_HEIGHT * 0.7) / correct_distance;
+            float column_height = (window.getSize().y * 1) / correct_distance;
 
             float shade_c = rays[i].castType == ctHorizontal ? 255 - 20 : 255;
             /*color_transform = shade_c - shade_c/rays[i].distance;
             if (rays[i].distance > 20)
                 shade_c = 0;*/
             sf::Color shade(shade_c, shade_c, shade_c);
+            if (i == center_column)
+                shade = sf::Color::Red;
 
             sf::RectangleShape column(sf::Vector2f(column_width, column_height));
             column.setOrigin(column.getSize().x / 2, column.getSize().y / 2);
-            column.setPosition(i * column_width, WINDOW_HEIGHT / 2);
+            column.setPosition(i * column_width, window.getSize().y / 2);
             column.setFillColor(shade);
             window.draw(column);
         }
@@ -207,13 +210,13 @@ void Renderer::RenderWorld(sf::RenderWindow& window, Player& player, std::vector
 
 void Renderer::Render(sf::RenderWindow& window, Player& player)
 {
-    const int COLUMN_COUNT = WINDOW_WIDTH;
+    const int COLUMN_COUNT = window.getSize().x;
     std::vector<RayResult> rays;
     // for vr projection
     //for (float i = player.GetRotation() + 20 * DEG_TO_RAD; i >= player.GetRotation() - 20 * DEG_TO_RAD; i -= 0.25 * DEG_TO_RAD) {
     // for plane projection
     for (int i = COLUMN_COUNT; i > 0; i--) {
-        float angle = std::atan((float)(i - COLUMN_COUNT / 2) / 400);
+        float angle = std::atan((float)(i - COLUMN_COUNT / 2) / 1500);
         RayResult ray = RunRayCast(player.GetCoord(), player.GetRotation() + angle);
         rays.push_back(ray);
     }
