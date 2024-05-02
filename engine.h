@@ -13,6 +13,7 @@ private:
 
     void ProcessInput();
     void ProcessEvent(sf::Event& event);
+    void SetCursorLock(bool lock);
 public:
     Engine();
 	void Run();

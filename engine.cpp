@@ -23,6 +23,11 @@ void Engine::ProcessInput()
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
             player.Rotate(-20.f * DEG_TO_RAD * dt.asSeconds() * sensitivity);
 
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+            player.isCrouching = true;
+        else
+            player.isCrouching = false;
+
         sf::Vector2i mouseCoord = sf::Mouse::getPosition(window);
         sf::Vector2i windowCenter = sf::Vector2i(window.getSize() / 2u);
         player.Rotate((windowCenter.x - mouseCoord.x) * DEG_TO_RAD * dt.asSeconds() * sensitivity);
@@ -34,13 +39,15 @@ void Engine::ProcessEvent(sf::Event& event)
 {
     if (event.type == sf::Event::Closed)
         window.close();
-
     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-        lock = !lock;
-        window.setMouseCursorVisible(!lock);
-        window.setMouseCursorGrabbed(lock);
+        SetCursorLock(!lock);
     }
-
+    if (event.type == sf::Event::LostFocus) {
+        SetCursorLock(false);
+    }
+    if (event.type == sf::Event::GainedFocus) {
+        //SetCursorLock(lock);
+    }
     if (event.type == sf::Event::Resized)
     {
         // update the view to the new size of the window
@@ -49,14 +56,21 @@ void Engine::ProcessEvent(sf::Event& event)
     }
 }
 
+void Engine::SetCursorLock(bool lock)
+{
+    this->lock = lock;
+    window.setMouseCursorVisible(!lock);
+    window.setMouseCursorGrabbed(lock);
+}
+
 Engine::Engine()
-    : window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "25d-engine", sf::Style::Default, sf::ContextSettings(0,0,1))
+    : window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "25d-engine", sf::Style::Default, sf::ContextSettings(0,0,0))
 {
 }
 
 void Engine::Run()
 {
-    player.MoveTo(sf::Vector2f(8.5, 1.5));
+    player.MoveTo(sf::Vector2f(8.5, 2.5));
     player.Rotate(180 * DEG_TO_RAD);
 
     window.setMouseCursorVisible(false);
@@ -78,8 +92,8 @@ void Engine::Run()
         window.clear();
         mainRenderer.Render(window, player);
         window.display();
-        if (fpsClock.getElapsedTime().asSeconds() > 1) {
-            Debug::AddDebugLine(std::to_string(1 / dt.asSeconds()));
+        if (fpsClock.getElapsedTime().asSeconds() > 0.5) {
+            Debug::SetMetric("FPS", std::to_string(1 / dt.asSeconds()));
             fpsClock.restart();
         }
     }

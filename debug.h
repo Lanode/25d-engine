@@ -1,11 +1,14 @@
 #pragma once
 #include <string>
+#include <map>
 
 class Debug
 {
+private:
+	static std::map<std::string, std::string> metrics;
 public:
-	static std::string debugText;
-	static void AddDebugLine(std::string line);
-	static std::string GetDebugText();
-	static void ClearDebugText();
+	static void SetMetric(std::string name, std::string value);
+	static std::string GetMetricsAsText();
+	static void DeleteMetric(std::string name);
+	static void ClearMetrics();
 };

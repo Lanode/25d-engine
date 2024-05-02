@@ -1,18 +1,27 @@
 #include "debug.h"
 
-std::string Debug::debugText;
+std::map<std::string, std::string> Debug::metrics;
 
-void Debug::AddDebugLine(std::string line)
+void Debug::SetMetric(std::string name, std::string value)
 {
-	Debug::debugText.append(line + '\n');
+	Debug::metrics[name] = value;
 }
 
-std::string Debug::GetDebugText()
+std::string Debug::GetMetricsAsText()
 {
-	return Debug::debugText;
+	std::string result;
+	for (auto it = Debug::metrics.cbegin(); it != Debug::metrics.cend(); it++) {
+		result += it->first + ": " + it->second + '\n';
+	}
+	return result;
 }
 
-void Debug::ClearDebugText()
+void Debug::DeleteMetric(std::string name)
 {
-	Debug::debugText = "";
+	Debug::metrics.erase(name);
+}
+
+void Debug::ClearMetrics()
+{
+	Debug::metrics.clear();
 }

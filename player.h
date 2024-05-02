@@ -8,6 +8,7 @@ private:
 
     bool ProcessCollide(sf::Vector2f newCoord);
 public:
+    bool isCrouching = false;
     sf::Vector2f GetCoord();
     void MoveTo(sf::Vector2f coord);
     void MoveRelative(sf::Vector2f vec);

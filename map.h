@@ -2,6 +2,7 @@
 #include <array>
 #include <vector>
 #include <filesystem>
+#include <SFML/Graphics.hpp>
 #include "include/json.hpp"
 
 const std::array<std::array<short, 10>, 10> level = { {
@@ -19,7 +20,7 @@ const std::array<std::array<short, 10>, 10> level = { {
 
 class Cell
 {
-
+    sf::Texture wallTexture;
 };
 
 class Entity
@@ -32,5 +33,6 @@ class Map
     std::vector<std::vector<int>> cells;
 public:
     void LoadFromFile(std::filesystem::path path);
-    void GetCell(int x, int y);
+    Cell GetCell(sf::Vector2i);
+    sf::Vector2i GetSize();
 };

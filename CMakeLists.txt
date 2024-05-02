@@ -11,12 +11,12 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 
 add_executable(25d-engine "main.cpp"
-    "engine-math.h"  "engine-math.cpp"
-    "engine.h"       "engine.cpp"
-    "engine.h"       "renderer.cpp"
-    "debug.h"        "debug.cpp"
-    "level-loader.h" "level-loader.cpp"
-    "player.h" "player.cpp")
+    "engine-math.h" "engine-math.cpp"
+    "engine.h"      "engine.cpp"
+    "renderer.h"    "renderer.cpp"
+    "debug.h"       "debug.cpp"
+    "map.h"         "map.cpp"
+    "player.h"      "player.cpp")
 set_property(TARGET 25d-engine PROPERTY CXX_STANDARD 20)
 target_link_libraries(25d-engine PRIVATE sfml-graphics)
 target_compile_features(25d-engine PRIVATE cxx_std_17)
@@ -30,13 +30,13 @@ if(WIN32)
 endif()
 
 # Copying of engine assets
-file(GLOB ENGINE_ASSETS ${CMAKE_SOURCE_DIR}/assets/*)
-foreach(CurrentAssetFile IN LISTS ENGINE_ASSETS)
-    add_custom_command(
-            TARGET 25d-engine
-            COMMENT "Copy engine asset: ${CurrentAssetFile}"
-            PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CurrentAssetFile} $<TARGET_FILE_DIR:25d-engine>
-            VERBATIM)
-endforeach()
+# file(GLOB ENGINE_ASSETS ${CMAKE_SOURCE_DIR}/assets/*)
+# foreach(CurrentAssetFile IN LISTS ENGINE_ASSETS)
+#    add_custom_command(
+#             TARGET 25d-engine
+#             COMMENT "Copy engine asset: ${CurrentAssetFile}"
+#             PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CurrentAssetFile} $<TARGET_FILE_DIR:25d-engine>
+#             VERBATIM)
+# endforeach()
 
 install(TARGETS 25d-engine)

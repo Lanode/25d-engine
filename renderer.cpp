@@ -1,7 +1,7 @@
 #include <functional>
 #include <iostream>
 #include "debug.h"
-#include "level-loader.h"
+#include "map.h"
 #include "renderer.h"
 
 bool Renderer::RayCollided(CastType castType, sf::Vector2f touchCoord, float angle, RayResult& rayResult)
@@ -131,23 +131,18 @@ RayResult Renderer::RunRayCast(sf::Vector2f playerCoord, float angle)
 void Renderer::RenderDebug(sf::RenderWindow& window, Player& player, std::vector<RayResult>& rays)
 {
     const int SCALE = window.getSize().x / 40;
-    try {
-        for (int x = 0; x < 10; x++) {
-            for (int y = 0; y < 10; y++) {
-                sf::RectangleShape cell(sf::Vector2f(SCALE, SCALE));
-                cell.setPosition(x * SCALE, y * SCALE);
-                cell.setOutlineThickness(-1.f);
-                cell.setOutlineColor(sf::Color(135, 135, 135));
-                if (level[y][x] == 1)
-                    cell.setFillColor(sf::Color(75, 75, 75));
-                else
-                    cell.setFillColor(sf::Color::White);
-                window.draw(cell);
-            }
+    for (int x = 0; x < 10; x++) {
+        for (int y = 0; y < 10; y++) {
+            sf::RectangleShape cell(sf::Vector2f(SCALE, SCALE));
+            cell.setPosition(x * SCALE, y * SCALE);
+            cell.setOutlineThickness(-1.f);
+            cell.setOutlineColor(sf::Color(135, 135, 135));
+            if (level[y][x] == 1)
+                cell.setFillColor(sf::Color(75, 75, 75));
+            else
+                cell.setFillColor(sf::Color::White);
+            window.draw(cell);
         }
-    }
-    catch (std::exception) {
-        std::cerr << "std::out_of_range in render" << std::endl;
     }
 
     sf::CircleShape playerShape(SCALE / 10);
@@ -171,7 +166,7 @@ void Renderer::RenderDebug(sf::RenderWindow& window, Player& player, std::vector
     if (font.loadFromFile("ModernDOS8x8.ttf")) {
         sf::Text text;
         text.setFont(font);
-        text.setString(Debug::GetDebugText());
+        text.setString(Debug::GetMetricsAsText());
         text.setCharacterSize(15);
         text.setPosition(0, -5);
         text.setFillColor(sf::Color::White);
@@ -183,13 +178,30 @@ void Renderer::RenderDebug(sf::RenderWindow& window, Player& player, std::vector
 
 void Renderer::RenderWorld(sf::RenderWindow& window, Player& player, std::vector<RayResult>& rays)
 {
+    sf::Texture wallTexture;
+    wallTexture.loadFromFile("pic2.bmp");
+
+    sf::RectangleShape sky(sf::Vector2f(window.getSize().x, window.getSize().y / 2));
+    sky.setFillColor(sf::Color::Cyan);
+    window.draw(sky);
+    sf::RectangleShape ground(sf::Vector2f(window.getSize().x, window.getSize().y / 2));
+    ground.setPosition(sf::Vector2f(0, window.getSize().y/2));
+    ground.setFillColor(sf::Color::Green);
+    window.draw(ground);
+
+
+    int viewportHeight = (window.getSize().x * 9.f) / 16.f; // 16:9 = x:y
+    Debug::SetMetric("viewportHeight", std::to_string(viewportHeight));
+
+    float column_origin_y = window.getSize().y / 2;
+
     float column_width = (float)window.getSize().x / rays.size();
     int center_column = rays.size()/2;
     for (int i = 0; i < rays.size(); i++) {
         if (rays[i].hasTouch) {
             float beta = std::abs(rays[i].angle - player.GetRotation());
             float correct_distance = rays[i].distance * std::cos(beta);
-            float column_height = (window.getSize().y * 1) / correct_distance;
+            float column_height = (viewportHeight * 1.5) / correct_distance;
 
             float shade_c = rays[i].castType == ctHorizontal ? 255 - 20 : 255;
             /*color_transform = shade_c - shade_c/rays[i].distance;
@@ -201,8 +213,12 @@ void Renderer::RenderWorld(sf::RenderWindow& window, Player& player, std::vector
 
             sf::RectangleShape column(sf::Vector2f(column_width, column_height));
             column.setOrigin(column.getSize().x / 2, column.getSize().y / 2);
-            column.setPosition(i * column_width, window.getSize().y / 2);
+            column.setPosition(i * column_width, column_origin_y);
             column.setFillColor(shade);
+            column.setTexture(&wallTexture);
+            sf::Vector2f touchRelative = (rays[i].touchCoord - rays[i].cellCoord);
+            int textureStripeCoord = std::ceil((1-(rays[i].castType == ctHorizontal ? touchRelative.x : touchRelative.y)) * 10.f);
+            column.setTextureRect({textureStripeCoord, 0, 1, 10});
             window.draw(column);
         }
     }
@@ -211,17 +227,19 @@ void Renderer::RenderWorld(sf::RenderWindow& window, Player& player, std::vector
 void Renderer::Render(sf::RenderWindow& window, Player& player)
 {
     const int COLUMN_COUNT = window.getSize().x;
+    const int FOV = 60*DEG_TO_RAD;
+    const float HALF_CLOUMN_COUNT = COLUMN_COUNT / 2.f;
+    const float PROJECTION_DIST = HALF_CLOUMN_COUNT / std::tan(FOV / 2.f);
     std::vector<RayResult> rays;
     // for vr projection
     //for (float i = player.GetRotation() + 20 * DEG_TO_RAD; i >= player.GetRotation() - 20 * DEG_TO_RAD; i -= 0.25 * DEG_TO_RAD) {
     // for plane projection
     for (int i = COLUMN_COUNT; i > 0; i--) {
-        float angle = std::atan((float)(i - COLUMN_COUNT / 2) / 1500);
+        float angle = std::atan((float)(i - HALF_CLOUMN_COUNT) / PROJECTION_DIST);
         RayResult ray = RunRayCast(player.GetCoord(), player.GetRotation() + angle);
         rays.push_back(ray);
     }
 
     RenderWorld(window, player, rays);
     RenderDebug(window, player, rays);
-    Debug::ClearDebugText();
 }

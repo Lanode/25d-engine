@@ -1,5 +1,5 @@
 #include "engine-math.h"
-#include "level-loader.h"
+#include "map.h"
 #include "player.h"
 
 void Player::Rotate(float angle)
