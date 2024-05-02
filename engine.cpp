@@ -64,7 +64,7 @@ void Engine::SetCursorLock(bool lock)
 }
 
 Engine::Engine()
-    : window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "25d-engine", sf::Style::Default, sf::ContextSettings(0,0,0))
+    : window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "25d-engine", sf::Style::Default, sf::ContextSettings(0,0,2))
 {
 }
 

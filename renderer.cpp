@@ -27,7 +27,7 @@ bool Renderer::RayCollided(CastType castType, sf::Vector2f touchCoord, float ang
             rayResult.cellCoord = sf::Vector2f(disc_x - 1, disc_y);
         }
     }
-    // ???? ??? ? 4 ??????? ??????????
+    // если луч в 4 области окружности
     else {
         if (level[disc_y][disc_x] == 1) {
             rayResult.hasTouch = true;
@@ -47,12 +47,12 @@ bool Renderer::IsRayOutOfBounds(sf::Vector2f touchCoord)
 RayResult Renderer::CastRay(CastType castType, sf::Vector2f playerCoord, float angle)
 {
     const int ROV = 10;
-    float ap, bp; // ?????????? ??????
-    float a, b; // ?????? ????????? ????
-    float as, bs; // ?????????? ???? ??? ???????? ????????
-    float an, bn; // ?????????? ???? ??? ?????????? ?????? ????
-    bool look_to0; // ??? ????????? ?? ????
-    std::function<float(float, float)> trig_f; // ??????? ?????????? ??????
+    float ap, bp; // координаты игрока
+    float a, b; // полные кординаты луча
+    float as, bs; // координаты луча при ячеечных отрезках
+    float an, bn; // координаты луча при вычислении первой мили
+    bool look_to0; // луч направлен на ноль
+    std::function<float(float, float)> trig_f; // функция вычисления катета
 
     if (castType == ctHorizontal) {
         ap = playerCoord.x;
@@ -78,7 +78,7 @@ RayResult Renderer::CastRay(CastType castType, sf::Vector2f playerCoord, float a
     a = an;
     b = bn;
 
-    // ???? ???? ????? ?? ???? ?????????, ? ???? ???? ?? ??????????
+    // если идёт вверх то надо отбавлять, а если вниз то прибавлять
     bs = look_to0 ? -1 : 1;
     as = trig_f(angle, bs);
 
@@ -179,8 +179,9 @@ void Renderer::RenderDebug(sf::RenderWindow& window, Player& player, std::vector
 void Renderer::RenderWorld(sf::RenderWindow& window, Player& player, std::vector<RayResult>& rays)
 {
     sf::Texture wallTexture;
-    wallTexture.loadFromFile("pic2.bmp");
+    wallTexture.loadFromFile("pic.bmp");
 
+    // отрисовка фона
     sf::RectangleShape sky(sf::Vector2f(window.getSize().x, window.getSize().y / 2));
     sky.setFillColor(sf::Color::Cyan);
     window.draw(sky);
@@ -189,37 +190,43 @@ void Renderer::RenderWorld(sf::RenderWindow& window, Player& player, std::vector
     ground.setFillColor(sf::Color::Green);
     window.draw(ground);
 
-
-    int viewportHeight = (window.getSize().x * 9.f) / 16.f; // 16:9 = x:y
-    Debug::SetMetric("viewportHeight", std::to_string(viewportHeight));
-
-    float column_origin_y = window.getSize().y / 2;
-
-    float column_width = (float)window.getSize().x / rays.size();
-    int center_column = rays.size()/2;
+    // вычисление и отрисовка полосок
+    int viewportHeight = (window.getSize().x * 9.f) / 16.f; // 16:9 = x:y // нужно для того чтобы высота блоков не менялась от изменения высоты
+    float stripe_width = (float)window.getSize().x / rays.size();
+    int center_stripe = rays.size() / 2;
     for (int i = 0; i < rays.size(); i++) {
         if (rays[i].hasTouch) {
+            // вычисление высоты
             float beta = std::abs(rays[i].angle - player.GetRotation());
             float correct_distance = rays[i].distance * std::cos(beta);
-            float column_height = (viewportHeight * 1.5) / correct_distance;
+            float stripe_height = (viewportHeight * 1.5) / correct_distance;
 
+            // вычисление позиции
+            sf::Vector2f stripePosition(i * stripe_width, window.getSize().y / 2);
+
+            // вычисление шейдера
             float shade_c = rays[i].castType == ctHorizontal ? 255 - 20 : 255;
             /*color_transform = shade_c - shade_c/rays[i].distance;
             if (rays[i].distance > 20)
                 shade_c = 0;*/
             sf::Color shade(shade_c, shade_c, shade_c);
-            if (i == center_column)
+            if (i == center_stripe)
                 shade = sf::Color::Red;
 
-            sf::RectangleShape column(sf::Vector2f(column_width, column_height));
-            column.setOrigin(column.getSize().x / 2, column.getSize().y / 2);
-            column.setPosition(i * column_width, column_origin_y);
-            column.setFillColor(shade);
-            column.setTexture(&wallTexture);
+            // вычисление координат текстуры
             sf::Vector2f touchRelative = (rays[i].touchCoord - rays[i].cellCoord);
-            int textureStripeCoord = std::ceil((1-(rays[i].castType == ctHorizontal ? touchRelative.x : touchRelative.y)) * 10.f);
-            column.setTextureRect({textureStripeCoord, 0, 1, 10});
-            window.draw(column);
+            float cellTextureOffset = (1 - (rays[i].castType == ctHorizontal ? touchRelative.x : touchRelative.y)); // "1 - ..." нужен так как иначе текстуры повёрнуты не в ту сторону
+            int textureOffset = cellTextureOffset * wallTexture.getSize().x + 1; // 1 нужен так как текстура почему-то смещается вправо
+            sf::IntRect textureRect(textureOffset, 0, 1, (int)wallTexture.getSize().y);
+
+            // создание и отрисовка объекта
+            sf::RectangleShape stripe(sf::Vector2f(stripe_width, stripe_height));
+            stripe.setOrigin(stripe.getSize().x / 2, stripe.getSize().y / 2);
+            stripe.setPosition(stripePosition);
+            stripe.setFillColor(shade);
+            stripe.setTexture(&wallTexture);
+            stripe.setTextureRect(textureRect);
+            window.draw(stripe);
         }
     }
 }
