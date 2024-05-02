@@ -30,7 +30,7 @@ class Entity
 
 class Map
 {
-    std::vector<std::vector<int>> cells;
+    std::vector<std::vector<std::shared_ptr<Cell>>> cells;
 public:
     void LoadFromFile(std::filesystem::path path);
     Cell GetCell(sf::Vector2i);

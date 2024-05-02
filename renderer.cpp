@@ -221,7 +221,7 @@ void Renderer::RenderWorld(sf::RenderWindow& window, Player& player, std::vector
 
             // создание и отрисовка объекта
             sf::RectangleShape stripe(sf::Vector2f(stripe_width, stripe_height));
-            stripe.setOrigin(stripe.getSize().x / 2, stripe.getSize().y / 2);
+            stripe.setOrigin(0, stripe.getSize().y / 2);
             stripe.setPosition(stripePosition);
             stripe.setFillColor(shade);
             stripe.setTexture(&wallTexture);
