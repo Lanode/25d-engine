@@ -1,8 +1,9 @@
 #include "engine.h"
+#include <stdio.h>
 
-int main()
+int main(int argc, char *argv[])
 {
-    Engine engine;
+    Engine engine(argc, argv);
     engine.Run();
     return 0;
 }

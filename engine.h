@@ -1,13 +1,15 @@
 #pragma once
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
-#include "player.h"
+#include "resources.h"
+#include "entities/player.h"
 
 class Engine
 {
 private:
-    sf::RenderWindow window;
-    Player player;
+    std::shared_ptr<sf::RenderWindow>  window;
+    std::shared_ptr<Player> player;
+    std::shared_ptr<ResourcesManager> resourcesManager;
     sf::Time dt;
     bool lock = true;
 
@@ -15,6 +17,6 @@ private:
     void ProcessEvent(sf::Event& event);
     void SetCursorLock(bool lock);
 public:
-    Engine();
-	void Run();
+    Engine(int argc, char *argv[]);
+    void Run();
 };

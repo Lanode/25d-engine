@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <format>
 #include <map>
 
 class Debug
@@ -11,4 +12,6 @@ public:
 	static std::string GetMetricsAsText();
 	static void DeleteMetric(std::string name);
 	static void ClearMetrics();
+
+	static void WriteLn(std::string line);
 };

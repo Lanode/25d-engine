@@ -1,3 +1,4 @@
+#include <iostream>
 #include "debug.h"
 
 std::map<std::string, std::string> Debug::metrics;
@@ -24,4 +25,9 @@ void Debug::DeleteMetric(std::string name)
 void Debug::ClearMetrics()
 {
 	Debug::metrics.clear();
+}
+
+void Debug::WriteLn(std::string line)
+{
+	std::cout << line << std::endl;
 }
